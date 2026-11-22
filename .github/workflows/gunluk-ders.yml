@@ -1,0 +1,40 @@
+name: Gunluk Portekizce B1 Dersi
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gunluk-ders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dosyalari al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Gerekli kutuphaneleri kur
+        run: pip install openai
+
+      - name: Yeni dersi olustur
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/gunluk_ders.py
+
+      - name: Degisiklikleri GitHub'a kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Gunluk Portekizce B1 dersi"
+            git push
+          fi
